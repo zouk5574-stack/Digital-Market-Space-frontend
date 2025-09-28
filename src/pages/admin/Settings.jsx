@@ -1,5 +1,9 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import { Switch } from "@/components/ui/switch";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { toast } from "react-hot-toast";
 
 function Settings() {
   const [settings, setSettings] = useState({
@@ -12,7 +16,7 @@ function Settings() {
   useEffect(() => {
     api.get("/admin/settings")
       .then(res => setSettings(res.data))
-      .catch(err => console.error("Erreur chargement settings:", err));
+      .catch(() => toast.error("Erreur lors du chargement des paramètres"));
   }, []);
 
   const handleChange = (e) => {
@@ -25,60 +29,61 @@ function Settings() {
 
   const handleSave = () => {
     api.put("/admin/settings", settings)
-      .then(() => alert("✅ Paramètres mis à jour !"))
-      .catch(() => alert("❌ Erreur sauvegarde paramètres"));
+      .then(() => toast.success("✅ Paramètres mis à jour !"))
+      .catch(() => toast.error("❌ Erreur sauvegarde paramètres"));
   };
 
   return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">⚙️ Paramètres Admin</h1>
+    <div className="p-6 grid gap-6">
+      <Card>
+        <CardHeader>
+          <CardTitle>🔑 Clés Fedapay</CardTitle>
+        </CardHeader>
+        <CardContent className="grid gap-4">
+          <input
+            type="text"
+            name="fedapayPublicKey"
+            placeholder="Fedapay Public Key"
+            value={settings.fedapayPublicKey}
+            onChange={handleChange}
+            className="border p-2 rounded w-full"
+          />
+          <input
+            type="password"
+            name="fedapaySecretKey"
+            placeholder="Fedapay Secret Key"
+            value={settings.fedapaySecretKey}
+            onChange={handleChange}
+            className="border p-2 rounded w-full"
+          />
+        </CardContent>
+      </Card>
 
-      <div className="mb-4">
-        <label className="block">Fedapay Public Key</label>
-        <input
-          type="text"
-          name="fedapayPublicKey"
-          value={settings.fedapayPublicKey}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-      </div>
+      <Card>
+        <CardHeader>
+          <CardTitle>⚙️ Automatisations (CRON)</CardTitle>
+        </CardHeader>
+        <CardContent className="flex flex-col gap-4">
+          <div className="flex justify-between items-center">
+            <span>Auto-Confirmation des commandes</span>
+            <Switch
+              checked={settings.cronAutoConfirmOrders}
+              onCheckedChange={() => handleToggle("cronAutoConfirmOrders")}
+            />
+          </div>
+          <div className="flex justify-between items-center">
+            <span>Auto-Validation des retraits</span>
+            <Switch
+              checked={settings.cronAutoWithdrawals}
+              onCheckedChange={() => handleToggle("cronAutoWithdrawals")}
+            />
+          </div>
+        </CardContent>
+      </Card>
 
-      <div className="mb-4">
-        <label className="block">Fedapay Secret Key</label>
-        <input
-          type="password"
-          name="fedapaySecretKey"
-          value={settings.fedapaySecretKey}
-          onChange={handleChange}
-          className="border p-2 rounded w-full"
-        />
-      </div>
-
-      <div className="mb-4 flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={settings.cronAutoConfirmOrders}
-          onChange={() => handleToggle("cronAutoConfirmOrders")}
-        />
-        <span>Activer Cron Auto-Confirmation des commandes</span>
-      </div>
-
-      <div className="mb-4 flex items-center gap-2">
-        <input
-          type="checkbox"
-          checked={settings.cronAutoWithdrawals}
-          onChange={() => handleToggle("cronAutoWithdrawals")}
-        />
-        <span>Activer Cron Auto-Validation des retraits</span>
-      </div>
-
-      <button
-        onClick={handleSave}
-        className="px-4 py-2 bg-blue-600 text-white rounded"
-      >
+      <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
         Sauvegarder
-      </button>
+      </Button>
     </div>
   );
 }
