@@ -1,72 +1,88 @@
 import { useEffect, useState } from "react";
-import axios from "axios";
+import api from "../services/api";
 
-const API_URL = import.meta.env.VITE_API_URL || "http://localhost:5000/api";
-
-export default function Messages() {
+function Messages() {
   const [messages, setMessages] = useState([]);
   const [newMessage, setNewMessage] = useState("");
-
-  const fetchMessages = async () => {
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.get(`${API_URL}/messages`, {
-        headers: { Authorization: `Bearer ${token}` },
-      });
-      setMessages(res.data || []);
-    } catch (err) {
-      console.error("Erreur chargement messages:", err);
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!newMessage.trim()) return;
-    try {
-      const token = localStorage.getItem("token");
-      const res = await axios.post(
-        `${API_URL}/messages`,
-        { content: newMessage },
-        { headers: { Authorization: `Bearer ${token}` } }
-      );
-      setMessages([...messages, res.data]);
-      setNewMessage("");
-    } catch (err) {
-      console.error("Erreur envoi:", err);
-    }
-  };
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     fetchMessages();
   }, []);
 
-  return (
-    <div className="max-w-2xl mx-auto p-6">
-      <h2 className="text-2xl font-bold mb-4">💬 Messages</h2>
-      <div className="space-y-2 max-h-80 overflow-y-auto border p-4 rounded">
-        {messages.map((msg, i) => (
-          <div key={i} className="p-2 bg-gray-100 rounded">
-            <p>{msg.content}</p>
-            <small className="text-gray-500">
-              {new Date(msg.created_at).toLocaleString()}
-            </small>
-          </div>
-        ))}
-      </div>
+  // 🔹 Récupération des messages
+  const fetchMessages = async () => {
+    try {
+      const res = await api.get("/messages");
+      setMessages(res.data);
+    } catch (err) {
+      console.error("Erreur récupération messages:", err);
+    } finally {
+      setLoading(false);
+    }
+  };
 
-      <div className="flex mt-4 space-x-2">
+  // 🔹 Envoi d’un nouveau message
+  const handleSendMessage = async (e) => {
+    e.preventDefault();
+    if (!newMessage.trim()) return;
+
+    try {
+      await api.post("/messages", { content: newMessage });
+      setNewMessage("");
+      fetchMessages();
+    } catch (err) {
+      console.error("Erreur envoi message:", err);
+    }
+  };
+
+  return (
+    <div className="p-6">
+      <h1 className="text-2xl font-bold mb-4">Messages 📩</h1>
+
+      {/* Formulaire envoi message */}
+      <form
+        onSubmit={handleSendMessage}
+        className="flex space-x-2 mb-6"
+      >
         <input
+          type="text"
+          placeholder="Écrire un message..."
           value={newMessage}
           onChange={(e) => setNewMessage(e.target.value)}
-          placeholder="Écris ton message..."
-          className="flex-1 border p-2 rounded"
+          className="border p-2 flex-1 rounded"
         />
         <button
-          onClick={sendMessage}
+          type="submit"
           className="bg-blue-600 text-white px-4 py-2 rounded"
         >
           Envoyer
         </button>
-      </div>
+      </form>
+
+      {/* Liste messages */}
+      {loading ? (
+        <p>Chargement des messages...</p>
+      ) : messages.length === 0 ? (
+        <p className="text-gray-600">Aucun message pour le moment.</p>
+      ) : (
+        <div className="space-y-4">
+          {messages.map((msg) => (
+            <div
+              key={msg.id}
+              className="p-3 border rounded bg-gray-50 shadow-sm"
+            >
+              <p className="font-semibold">{msg.senderName || "Utilisateur"}</p>
+              <p>{msg.content}</p>
+              <small className="text-gray-500">
+                {new Date(msg.created_at).toLocaleString()}
+              </small>
+            </div>
+          ))}
+        </div>
+      )}
     </div>
   );
 }
+
+export default Messages;
