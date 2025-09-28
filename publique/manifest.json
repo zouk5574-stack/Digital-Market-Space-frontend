@@ -1,16 +1,22 @@
 {
-  "short_name": "DigitalMarket",
   "name": "Digital Market Space",
+  "short_name": "DMS",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#2563eb",
+  "orientation": "portrait",
   "icons": [
     {
       "src": "/logo.png",
       "sizes": "512x512",
+      "type": "image/png"
+    },
+    {
+      "src": "/icon-transparent.png",
+      "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
     }
-  ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#1E40AF",
-  "background_color": "#FFFFFF"
+  ]
 }
