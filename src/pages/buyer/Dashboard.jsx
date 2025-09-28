@@ -5,35 +5,28 @@ function BuyerDashboard() {
   const [stats, setStats] = useState({});
 
   useEffect(() => {
-    const fetchStats = async () => {
-      try {
-        const res = await api.get("/buyer/stats");
-        setStats(res.data);
-      } catch (err) {
-        console.error("Erreur stats acheteur:", err);
-      }
-    };
-    fetchStats();
+    api.get("/buyer/stats")
+      .then(res => setStats(res.data))
+      .catch(err => console.error("Erreur stats acheteur:", err));
   }, []);
 
   return (
-    <div className="p-6 bg-gray-100 min-h-screen">
-      <h1 className="text-2xl font-bold mb-6">🛒 Tableau de bord Acheteur</h1>
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        <StatBox title="📦 Commandes" value={stats.orders} />
-        <StatBox title="💳 Paiements" value={stats.payments} />
-        <StatBox title="💬 Messages" value={stats.messages} />
-        <StatBox title="💰 Solde" value={`${stats.balance} CFA`} />
+    <div className="p-6">
+      <h1 className="text-3xl font-bold mb-6">👤 Dashboard Acheteur</h1>
+      <div className="grid grid-cols-3 gap-6">
+        <div className="p-4 bg-blue-100 rounded shadow">
+          <h2 className="text-lg font-bold">Commandes passées</h2>
+          <p>{stats.orders}</p>
+        </div>
+        <div className="p-4 bg-green-100 rounded shadow">
+          <h2 className="text-lg font-bold">Montant dépensé</h2>
+          <p>{stats.spent} CFA</p>
+        </div>
+        <div className="p-4 bg-yellow-100 rounded shadow">
+          <h2 className="text-lg font-bold">Produits favoris</h2>
+          <p>{stats.favorites}</p>
+        </div>
       </div>
-    </div>
-  );
-}
-
-function StatBox({ title, value }) {
-  return (
-    <div className="p-4 bg-white shadow rounded">
-      <h2 className="text-sm text-gray-500">{title}</h2>
-      <p className="text-xl font-bold">{value || 0}</p>
     </div>
   );
 }
