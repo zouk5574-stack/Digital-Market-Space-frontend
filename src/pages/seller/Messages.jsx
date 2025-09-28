@@ -1,28 +1,11 @@
-import { useEffect, useState } from "react";
-import api from "../../services/api";
+// src/pages/seller/Messages.jsx
+// Same behavior as buyer messages but used in seller area (path ../services/api)
 
-function SellerMessages() {
-  const [messages, setMessages] = useState([]);
+import React from "react";
+import BuyerMessages from "../../pages/buyer/Messages"; // reuse component if present
 
-  useEffect(() => {
-    api.get("/seller/messages")
-      .then(res => setMessages(res.data))
-      .catch(err => console.error("Erreur chargement messages:", err));
-  }, []);
-
-  return (
-    <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">✉️ Messages avec clients</h1>
-      <div className="space-y-4">
-        {messages.map(m => (
-          <div key={m.id} className="p-4 border rounded shadow bg-white">
-            <p><strong>{m.sender}</strong> : {m.content}</p>
-            <small className="text-gray-500">{new Date(m.created_at).toLocaleString()}</small>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+export default function SellerMessagesWrapper() {
+  // Re-use BuyerMessages component logic; it handles orderId via query string.
+  // This wrapper keeps pathing consistent in routes.
+  return <BuyerMessages />;
 }
-
-export default SellerMessages;
