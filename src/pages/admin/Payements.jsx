@@ -1,42 +1,43 @@
-import { useEffect, useState } from "react";
+// src/pages/admin/Payements.jsx
+// Hypothèse : backend expose GET /api/paiements for admin
+import React, { useEffect, useState } from "react";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
-function Payments() {
+export default function PayementsAdmin() {
   const [payments, setPayments] = useState([]);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    api.get("/admin/payments")
-      .then(res => setPayments(res.data))
-      .catch(err => console.error("Erreur paiements:", err));
+    let mounted = true;
+    api.get("/paiements")
+      .then(res => { if (mounted) setPayments(Array.isArray(res.data) ? res.data : []); })
+      .catch(err => {
+        console.error("Erreur chargement paiements (admin):", err);
+        toast.error("Impossible de charger les paiements.");
+      })
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
   }, []);
+
+  if (loading) return <div className="p-6">Chargement...</div>;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">💳 Paiements</h1>
-      <table className="w-full border shadow bg-white">
-        <thead className="bg-gray-100">
-          <tr>
-            <th>ID</th>
-            <th>Utilisateur</th>
-            <th>Montant</th>
-            <th>Méthode</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
+      <h1 className="text-2xl font-semibold mb-4">Paiements (admin)</h1>
+      {payments.length === 0 ? <div>Aucun paiement.</div> : (
+        <ul className="space-y-2">
           {payments.map(p => (
-            <tr key={p.id} className="border-t">
-              <td className="p-2">{p.id}</td>
-              <td className="p-2">{p.user_name}</td>
-              <td className="p-2">{p.amount} CFA</td>
-              <td className="p-2">{p.method}</td>
-              <td className="p-2">{new Date(p.created_at).toLocaleString()}</td>
-            </tr>
+            <li key={p.id} className="border p-3 rounded flex justify-between">
+              <div>
+                <div className="font-medium">#{p.id} — {p.userEmail || p.customer || "client"}</div>
+                <div className="text-sm text-gray-500">{Number(p.amount || 0).toLocaleString()} CFA</div>
+              </div>
+              <div className="text-sm">{p.status || "unknown"}</div>
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      )}
     </div>
   );
 }
-
-export default Payments;
