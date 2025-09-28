@@ -1,120 +1,59 @@
-import { useEffect, useState } from "react";
-import api from "../services/api";
+// src/pages/Settings.jsx
+// Hypothèse : GET /auth/me returns profile; update via PUT /settings (fallback PUT /auth/me)
 
-function Settings() {
-  const [settings, setSettings] = useState({
-    email: "",
-    phone: "",
-    notifications: true,
-    theme: "light",
-  });
+import React, { useEffect, useState } from "react";
+import api from "../services/api";
+import toast from "react-hot-toast";
+
+export default function Settings() {
+  const [profile, setProfile] = useState({ name: "", email: "" });
   const [loading, setLoading] = useState(true);
+  const [saving, setSaving] = useState(false);
 
   useEffect(() => {
-    fetchSettings();
+    let mounted = true;
+    api.get("/auth/me")
+      .then(res => { if (mounted && res?.data) setProfile({ name: res.data.name || "", email: res.data.email || "" }); })
+      .catch(err => {
+        console.error("Erreur profile:", err);
+        toast.error("Impossible de charger le profil.");
+      })
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
   }, []);
 
-  // 🔹 Récupérer les paramètres utilisateur
-  const fetchSettings = async () => {
+  const save = async () => {
+    setSaving(true);
     try {
-      const res = await api.get("/settings");
-      setSettings(res.data);
+      // try /settings first then fallback to /auth/me
+      await api.put("/settings", profile).catch(async err => {
+        // fallback
+        const res = await api.put("/auth/me", profile);
+        return res;
+      });
+      toast.success("Profil mis à jour.");
     } catch (err) {
-      console.error("Erreur récupération settings:", err);
+      console.error(err);
+      toast.error("Erreur mise à jour profil.");
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
 
-  // 🔹 Sauvegarder les paramètres
-  const saveSettings = async (e) => {
-    e.preventDefault();
-    try {
-      await api.put("/settings", settings);
-      alert("✅ Paramètres enregistrés avec succès !");
-    } catch (err) {
-      console.error("Erreur mise à jour settings:", err);
-      alert("❌ Erreur lors de la mise à jour des paramètres.");
-    }
-  };
-
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    setSettings({
-      ...settings,
-      [name]: type === "checkbox" ? checked : value,
-    });
-  };
+  if (loading) return <div className="p-6">Chargement...</div>;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-6">⚙️ Paramètres</h1>
-
-      {loading ? (
-        <p>Chargement...</p>
-      ) : (
-        <form onSubmit={saveSettings} className="space-y-6">
-          {/* Email */}
-          <div>
-            <label className="block text-sm font-medium">Email</label>
-            <input
-              type="email"
-              name="email"
-              value={settings.email}
-              onChange={handleChange}
-              className="w-full p-2 border rounded mt-1"
-            />
-          </div>
-
-          {/* Téléphone */}
-          <div>
-            <label className="block text-sm font-medium">Téléphone</label>
-            <input
-              type="text"
-              name="phone"
-              value={settings.phone}
-              onChange={handleChange}
-              className="w-full p-2 border rounded mt-1"
-            />
-          </div>
-
-          {/* Notifications */}
-          <div className="flex items-center">
-            <input
-              type="checkbox"
-              name="notifications"
-              checked={settings.notifications}
-              onChange={handleChange}
-              className="mr-2"
-            />
-            <label>Activer les notifications</label>
-          </div>
-
-          {/* Thème */}
-          <div>
-            <label className="block text-sm font-medium">Thème</label>
-            <select
-              name="theme"
-              value={settings.theme}
-              onChange={handleChange}
-              className="w-full p-2 border rounded mt-1"
-            >
-              <option value="light">🌞 Clair</option>
-              <option value="dark">🌙 Sombre</option>
-            </select>
-          </div>
-
-          {/* Bouton Sauvegarder */}
-          <button
-            type="submit"
-            className="bg-blue-600 text-white px-4 py-2 rounded shadow hover:bg-blue-700"
-          >
-            Sauvegarder
-          </button>
-        </form>
-      )}
+      <h1 className="text-2xl font-semibold mb-4">Profil</h1>
+      <div className="max-w-md">
+        <label className="block text-sm font-medium">Nom</label>
+        <input value={profile.name} onChange={e => setProfile({ ...profile, name: e.target.value })} className="w-full border p-2 rounded mb-3" />
+        <label className="block text-sm font-medium">Email</label>
+        <input value={profile.email} onChange={e => setProfile({ ...profile, email: e.target.value })} className="w-full border p-2 rounded mb-3" />
+        <div className="flex gap-2">
+          <button onClick={save} disabled={saving} className="px-4 py-2 bg-blue-600 text-white rounded">{saving ? "Envoi..." : "Enregistrer"}</button>
+        </div>
+      </div>
     </div>
   );
 }
-
-export default Settings;
