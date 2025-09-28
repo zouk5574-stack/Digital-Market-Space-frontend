@@ -1,27 +1,33 @@
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import Layout from "./components/Layout.jsx";
-import Home from "./pages/Home.jsx";
-import Produits from "./pages/Produits.jsx";
-import Commandes from "./pages/Commandes.jsx";
-import Messages from "./pages/Messages.jsx";
-import Paiements from "./pages/Paiements.jsx";
-import Parametres from "./pages/Parametres.jsx";
-import Auth from "./pages/Auth.jsx";
+import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+
+import Home from "./pages/Home";
+import Auth from "./pages/Auth";
+import Products from "./pages/Products";
+import Orders from "./pages/Orders";
+import Payments from "./pages/Payments";
+import Withdrawals from "./pages/Withdrawals";
+import Messages from "./pages/Messages";
+import Parametres from "./pages/Parametres";
 
 function App() {
   return (
     <Router>
-      <Layout>
+      <Navbar />
+      <main className="min-h-screen">
         <Routes>
           <Route path="/" element={<Home />} />
-          <Route path="/produits" element={<Produits />} />
-          <Route path="/commandes" element={<Commandes />} />
-          <Route path="/messages" element={<Messages />} />
-          <Route path="/paiements" element={<Paiements />} />
-          <Route path="/parametres" element={<Parametres />} />
           <Route path="/auth" element={<Auth />} />
+          <Route path="/products" element={<Products />} />
+          <Route path="/orders" element={<Orders />} />
+          <Route path="/payments" element={<Payments />} />
+          <Route path="/withdrawals" element={<Withdrawals />} />
+          <Route path="/messages" element={<Messages />} />
+          <Route path="/settings" element={<Parametres />} />
         </Routes>
-      </Layout>
+      </main>
+      <Footer />
     </Router>
   );
 }
