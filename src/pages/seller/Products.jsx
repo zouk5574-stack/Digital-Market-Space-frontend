@@ -1,40 +1,71 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 
-function Products() {
+function SellerProducts() {
   const [products, setProducts] = useState([]);
+  const [newProduct, setNewProduct] = useState({ name: "", price: 0 });
 
   useEffect(() => {
-    api.get("/products/mine")
+    api.get("/seller/products")
       .then(res => setProducts(res.data))
-      .catch(err => console.error("Erreur produits vendeur:", err));
+      .catch(err => console.error("Erreur chargement produits:", err));
   }, []);
+
+  const handleChange = (e) => {
+    setNewProduct({ ...newProduct, [e.target.name]: e.target.value });
+  };
+
+  const addProduct = () => {
+    api.post("/seller/products", newProduct)
+      .then(res => {
+        setProducts([...products, res.data]);
+        setNewProduct({ name: "", price: 0 });
+      })
+      .catch(() => alert("❌ Erreur ajout produit"));
+  };
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">📦 Mes Produits</h1>
-      <button className="mb-4 px-4 py-2 bg-blue-600 text-white rounded">
-        + Ajouter un produit
-      </button>
+
+      <div className="mb-6 flex gap-2">
+        <input
+          type="text"
+          name="name"
+          value={newProduct.name}
+          onChange={handleChange}
+          placeholder="Nom du produit"
+          className="border p-2 rounded w-1/2"
+        />
+        <input
+          type="number"
+          name="price"
+          value={newProduct.price}
+          onChange={handleChange}
+          placeholder="Prix"
+          className="border p-2 rounded w-1/4"
+        />
+        <button onClick={addProduct} className="px-4 py-2 bg-green-600 text-white rounded">
+          Ajouter
+        </button>
+      </div>
+
       <table className="w-full border shadow bg-white">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-2">Nom</th>
-            <th className="p-2">Prix</th>
-            <th className="p-2">Stock</th>
-            <th className="p-2">Actions</th>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Prix</th>
+            <th>Date</th>
           </tr>
         </thead>
         <tbody>
           {products.map(p => (
             <tr key={p.id} className="border-t">
+              <td className="p-2">{p.id}</td>
               <td className="p-2">{p.name}</td>
               <td className="p-2">{p.price} CFA</td>
-              <td className="p-2">{p.stock}</td>
-              <td className="p-2">
-                <button className="px-2 py-1 bg-yellow-500 text-white rounded">Modifier</button>
-                <button className="ml-2 px-2 py-1 bg-red-500 text-white rounded">Supprimer</button>
-              </td>
+              <td className="p-2">{new Date(p.created_at).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
@@ -43,4 +74,4 @@ function Products() {
   );
 }
 
-export default Products;
+export default SellerProducts;
