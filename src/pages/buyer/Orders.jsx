@@ -5,7 +5,7 @@ function BuyerOrders() {
   const [orders, setOrders] = useState([]);
 
   useEffect(() => {
-    api.get("/orders/mine")
+    api.get("/buyer/orders")
       .then(res => setOrders(res.data))
       .catch(err => console.error("Erreur commandes acheteur:", err));
   }, []);
@@ -16,10 +16,12 @@ function BuyerOrders() {
       <table className="w-full border shadow bg-white">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-2">Commande</th>
-            <th className="p-2">Produit</th>
-            <th className="p-2">Prix</th>
-            <th className="p-2">Statut</th>
+            <th>ID</th>
+            <th>Produit</th>
+            <th>Vendeur</th>
+            <th>Montant</th>
+            <th>Statut</th>
+            <th>Date</th>
           </tr>
         </thead>
         <tbody>
@@ -27,8 +29,10 @@ function BuyerOrders() {
             <tr key={o.id} className="border-t">
               <td className="p-2">{o.id}</td>
               <td className="p-2">{o.product_name}</td>
-              <td className="p-2">{o.price} CFA</td>
+              <td className="p-2">{o.seller_name}</td>
+              <td className="p-2">{o.amount} CFA</td>
               <td className="p-2">{o.status}</td>
+              <td className="p-2">{new Date(o.created_at).toLocaleString()}</td>
             </tr>
           ))}
         </tbody>
