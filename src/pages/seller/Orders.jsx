@@ -1,59 +1,59 @@
-import { useEffect, useState } from "react";
-import api from "../../services/api";
+// src/pages/seller/Orders.jsx
+// Hypothèse : backend expose GET /api/orders/my-sales and PUT /api/orders/:id/status
 
-function SellerOrders() {
+import React, { useEffect, useState } from "react";
+import api from "../../services/api";
+import toast from "react-hot-toast";
+
+export default function SellerOrders() {
   const [orders, setOrders] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [processing, setProcessing] = useState({});
 
   useEffect(() => {
-    api.get("/seller/orders")
-      .then(res => setOrders(res.data))
-      .catch(err => console.error("Erreur chargement commandes:", err));
+    let mounted = true;
+    api.get("/orders/my-sales")
+      .then(res => { if (mounted) setOrders(Array.isArray(res.data) ? res.data : []); })
+      .catch(err => { console.error(err); toast.error("Impossible de charger vos ventes."); })
+      .finally(() => mounted && setLoading(false));
+    return () => { mounted = false; };
   }, []);
 
-  const updateStatus = (id, status) => {
-    api.put(`/seller/orders/${id}`, { status })
-      .then(() => {
-        setOrders(orders.map(o => (o.id === id ? { ...o, status } : o)));
-      })
-      .catch(() => alert("❌ Erreur mise à jour statut"));
+  const changeStatus = async (id, status) => {
+    setProcessing(prev => ({ ...prev, [id]: true }));
+    try {
+      await api.put(`/orders/${id}/status`, { status });
+      setOrders(prev => prev.map(o => o.id === id ? { ...o, status } : o));
+      toast.success("Statut mis à jour.");
+    } catch (err) {
+      console.error(err);
+      toast.error("Erreur mise à jour statut.");
+    } finally {
+      setProcessing(prev => ({ ...prev, [id]: false }));
+    }
   };
+
+  if (loading) return <div className="p-6">Chargement...</div>;
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">📑 Commandes reçues</h1>
-      <table className="w-full border shadow bg-white">
-        <thead className="bg-gray-100">
-          <tr>
-            <th>ID</th>
-            <th>Produit</th>
-            <th>Acheteur</th>
-            <th>Montant</th>
-            <th>Statut</th>
-            <th>Action</th>
-          </tr>
-        </thead>
-        <tbody>
+      <h1 className="text-2xl font-semibold mb-4">Commandes (mes ventes)</h1>
+      {orders.length === 0 ? <div>Aucune commande.</div> : (
+        <ul className="space-y-3">
           {orders.map(o => (
-            <tr key={o.id} className="border-t">
-              <td className="p-2">{o.id}</td>
-              <td className="p-2">{o.product_name}</td>
-              <td className="p-2">{o.buyer_name}</td>
-              <td className="p-2">{o.amount} CFA</td>
-              <td className="p-2">{o.status}</td>
-              <td className="p-2 flex gap-2">
-                <button onClick={() => updateStatus(o.id, "expédié")} className="px-2 py-1 bg-blue-500 text-white rounded">
-                  Expédier
-                </button>
-                <button onClick={() => updateStatus(o.id, "annulé")} className="px-2 py-1 bg-red-500 text-white rounded">
-                  Annuler
-                </button>
-              </td>
-            </tr>
+            <li key={o.id} className="p-3 border rounded flex justify-between items-center">
+              <div>
+                <div className="font-medium">Commande #{o.id}</div>
+                <div className="text-sm text-gray-500">{o.items?.length || 0} articles — {Number(o.total || 0).toLocaleString()} CFA</div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="text-sm">{o.status}</div>
+                <button disabled={processing[o.id]} onClick={() => changeStatus(o.id, "completed")} className="px-2 py-1 bg-green-600 text-white rounded">Mark completed</button>
+              </div>
+            </li>
           ))}
-        </tbody>
-      </table>
+        </ul>
+      )}
     </div>
   );
 }
-
-export default SellerOrders;
