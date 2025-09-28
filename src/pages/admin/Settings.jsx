@@ -1,91 +1,44 @@
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import api from "../../services/api";
-import { Switch } from "@/components/ui/switch";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
-import { toast } from "react-hot-toast";
+import toast from "react-hot-toast";
 
-function Settings() {
-  const [settings, setSettings] = useState({
-    fedapayPublicKey: "",
-    fedapaySecretKey: "",
-    cronAutoConfirmOrders: false,
-    cronAutoWithdrawals: false,
-  });
+export default function Settings() {
+  const [settings, setSettings] = useState({ fedapay_key: "", auto_confirm_delay_hours: 48, commission_rate: 10 });
 
   useEffect(() => {
-    api.get("/admin/settings")
-      .then(res => setSettings(res.data))
-      .catch(() => toast.error("Erreur lors du chargement des paramètres"));
+    api.get("/settings") // backend path may be /api/settings -> api.js already adds /api
+      .then(res => {
+        setSettings(prev => ({ ...prev, ...res.data }));
+      })
+      .catch(err => console.error(err));
   }, []);
 
-  const handleChange = (e) => {
-    setSettings({ ...settings, [e.target.name]: e.target.value });
-  };
-
-  const handleToggle = (name) => {
-    setSettings({ ...settings, [name]: !settings[name] });
-  };
-
-  const handleSave = () => {
-    api.put("/admin/settings", settings)
-      .then(() => toast.success("✅ Paramètres mis à jour !"))
-      .catch(() => toast.error("❌ Erreur sauvegarde paramètres"));
+  const save = () => {
+    api.put("/settings", settings)
+      .then(() => toast.success("Paramètres mis à jour"))
+      .catch(() => toast.error("Erreur sauvegarde"));
   };
 
   return (
-    <div className="p-6 grid gap-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>🔑 Clés Fedapay</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-4">
-          <input
-            type="text"
-            name="fedapayPublicKey"
-            placeholder="Fedapay Public Key"
-            value={settings.fedapayPublicKey}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-          />
-          <input
-            type="password"
-            name="fedapaySecretKey"
-            placeholder="Fedapay Secret Key"
-            value={settings.fedapaySecretKey}
-            onChange={handleChange}
-            className="border p-2 rounded w-full"
-          />
-        </CardContent>
-      </Card>
+    <div className="card max-w-2xl mx-auto">
+      <h2 className="text-xl font-bold text-primary mb-4">Paramètres</h2>
 
-      <Card>
-        <CardHeader>
-          <CardTitle>⚙️ Automatisations (CRON)</CardTitle>
-        </CardHeader>
-        <CardContent className="flex flex-col gap-4">
-          <div className="flex justify-between items-center">
-            <span>Auto-Confirmation des commandes</span>
-            <Switch
-              checked={settings.cronAutoConfirmOrders}
-              onCheckedChange={() => handleToggle("cronAutoConfirmOrders")}
-            />
-          </div>
-          <div className="flex justify-between items-center">
-            <span>Auto-Validation des retraits</span>
-            <Switch
-              checked={settings.cronAutoWithdrawals}
-              onCheckedChange={() => handleToggle("cronAutoWithdrawals")}
-            />
-          </div>
-        </CardContent>
-      </Card>
+      <div className="mb-3">
+        <label className="block text-sm">Clé Fedapay</label>
+        <input value={settings.fedapay_key || ""} onChange={e=>setSettings({...settings, fedapay_key: e.target.value})} className="border p-2 rounded w-full" />
+      </div>
 
-      <Button onClick={handleSave} className="bg-green-600 hover:bg-green-700">
-        Sauvegarder
-      </Button>
+      <div className="mb-3">
+        <label className="block text-sm">Délai auto-confirmation (heures)</label>
+        <input type="number" value={settings.auto_confirm_delay_hours} onChange={e=>setSettings({...settings, auto_confirm_delay_hours: Number(e.target.value)})} className="border p-2 rounded w-1/3" />
+      </div>
+
+      <div className="mb-3">
+        <label className="block text-sm">Taux commission (%)</label>
+        <input type="number" value={settings.commission_rate} onChange={e=>setSettings({...settings, commission_rate: Number(e.target.value)})} className="border p-2 rounded w-1/3" />
+      </div>
+
+      <button onClick={save} className="btn-primary">Sauvegarder</button>
     </div>
   );
 }
-
-export default Settings;
