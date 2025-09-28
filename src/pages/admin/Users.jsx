@@ -7,20 +7,20 @@ function Users() {
   useEffect(() => {
     api.get("/admin/users")
       .then(res => setUsers(res.data))
-      .catch(err => console.error("Erreur chargement users:", err));
+      .catch(err => console.error("Erreur users:", err));
   }, []);
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">👥 Gestion des utilisateurs</h1>
+      <h1 className="text-2xl font-bold mb-4">👥 Tous les utilisateurs</h1>
       <table className="w-full border shadow bg-white">
         <thead className="bg-gray-100">
           <tr>
-            <th className="p-2">ID</th>
-            <th className="p-2">Nom</th>
-            <th className="p-2">Email</th>
-            <th className="p-2">Rôle</th>
-            <th className="p-2">Actions</th>
+            <th>ID</th>
+            <th>Nom</th>
+            <th>Email</th>
+            <th>Rôle</th>
+            <th>Statut</th>
           </tr>
         </thead>
         <tbody>
@@ -30,9 +30,7 @@ function Users() {
               <td className="p-2">{u.name}</td>
               <td className="p-2">{u.email}</td>
               <td className="p-2">{u.role}</td>
-              <td className="p-2">
-                <button className="px-2 py-1 bg-red-500 text-white rounded">Supprimer</button>
-              </td>
+              <td className="p-2">{u.active ? "✅ Actif" : "❌ Bloqué"}</td>
             </tr>
           ))}
         </tbody>
