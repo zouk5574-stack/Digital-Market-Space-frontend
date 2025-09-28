@@ -1,31 +1,43 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
+import toast from "react-hot-toast";
 
 function Withdrawals() {
   const [withdrawals, setWithdrawals] = useState([]);
   const [amount, setAmount] = useState("");
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     api.get("/withdrawals/me")
       .then(res => setWithdrawals(res.data))
-      .catch(err => console.error("Erreur chargement retraits:", err));
+      .catch(() => toast.error("❌ Erreur lors du chargement des retraits"))
+      .finally(() => setLoading(false));
   }, []);
 
   const handleWithdraw = () => {
-    api.post("/withdrawals", { amount })
+    const value = parseFloat(amount);
+
+    if (isNaN(value) || value <= 0) {
+      toast.error("Veuillez entrer un montant valide.");
+      return;
+    }
+
+    api.post("/withdrawals", { amount: value })
       .then(res => {
-        alert("✅ Retrait demandé avec succès !");
+        toast.success("✅ Retrait demandé avec succès !");
         setWithdrawals([...withdrawals, res.data]);
         setAmount("");
       })
-      .catch(() => alert("❌ Erreur lors du retrait"));
+      .catch(() => toast.error("❌ Erreur lors du retrait"));
   };
+
+  if (loading) return <p className="p-6">⏳ Chargement...</p>;
 
   return (
     <div className="p-6">
       <h1 className="text-2xl font-bold mb-4">💵 Mes Retraits</h1>
 
-      <div className="mb-6">
+      <div className="mb-6 flex items-center">
         <input
           type="number"
           value={amount}
@@ -42,13 +54,17 @@ function Withdrawals() {
       </div>
 
       <h2 className="text-xl mb-2">📜 Historique</h2>
-      <ul>
-        {withdrawals.map(w => (
-          <li key={w.id} className="border p-2 mb-2 rounded">
-            {w.amount} CFA – {w.status}
-          </li>
-        ))}
-      </ul>
+      {withdrawals.length === 0 ? (
+        <p>Aucun retrait effectué pour le moment.</p>
+      ) : (
+        <ul>
+          {withdrawals.map(w => (
+            <li key={w.id} className="border p-2 mb-2 rounded">
+              {w.amount} CFA – {w.status}
+            </li>
+          ))}
+        </ul>
+      )}
     </div>
   );
 }
