@@ -2,27 +2,19 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  --color-bg: theme('colors.neutral.DEFAULT');
-  --color-text: theme('colors.neutral.dark');
-  --color-primary: theme('colors.primary.DEFAULT');
-  --color-accent: theme('colors.accent.DEFAULT');
+/* Global */
+:root{
+  --primary: #2CB67D;
+  --primary-dark: #249866;
+  --accent: #FF7F32;
+  --muted: #6B7280;
 }
 
-/* Corps global */
 body {
-  @apply bg-neutral text-neutral-dark font-sans;
+  @apply bg-neutral-100 text-neutral-900 font-sans;
 }
 
-/* Boutons génériques */
-.btn-primary {
-  @apply bg-primary text-white px-4 py-2 rounded-lg shadow hover:bg-primary-dark transition;
-}
-
-.btn-accent {
-  @apply bg-accent text-white px-4 py-2 rounded-lg shadow hover:bg-accent-dark transition;
-}
-
-.card {
-  @apply bg-white shadow rounded-2xl p-6;
-}
+/* helpers */
+.btn-primary { @apply bg-primary text-white px-4 py-2 rounded-lg shadow hover:bg-primary-dark transition; }
+.btn-accent { @apply bg-accent text-white px-4 py-2 rounded-lg shadow hover:opacity-95 transition; }
+.card { @apply bg-white shadow rounded-2xl p-6; }
