@@ -1,64 +1,56 @@
 import { useEffect, useState } from "react";
 import api from "../../services/api";
 
-function SellerWithdrawals() {
+function Withdrawals() {
   const [withdrawals, setWithdrawals] = useState([]);
   const [amount, setAmount] = useState("");
 
   useEffect(() => {
-    api.get("/seller/withdrawals")
+    api.get("/withdrawals/me")
       .then(res => setWithdrawals(res.data))
       .catch(err => console.error("Erreur chargement retraits:", err));
   }, []);
 
-  const requestWithdrawal = () => {
-    api.post("/seller/withdrawals", { amount })
+  const handleWithdraw = () => {
+    api.post("/withdrawals", { amount })
       .then(res => {
+        alert("✅ Retrait demandé avec succès !");
         setWithdrawals([...withdrawals, res.data]);
         setAmount("");
       })
-      .catch(() => alert("❌ Erreur demande retrait"));
+      .catch(() => alert("❌ Erreur lors du retrait"));
   };
 
   return (
     <div className="p-6">
-      <h1 className="text-2xl font-bold mb-4">💰 Retraits</h1>
+      <h1 className="text-2xl font-bold mb-4">💵 Mes Retraits</h1>
 
-      <div className="mb-4 flex gap-2">
+      <div className="mb-6">
         <input
           type="number"
           value={amount}
-          onChange={(e) => setAmount(e.target.value)}
-          placeholder="Montant"
-          className="border p-2 rounded w-1/3"
+          onChange={e => setAmount(e.target.value)}
+          placeholder="Montant à retirer"
+          className="border p-2 rounded mr-2"
         />
-        <button onClick={requestWithdrawal} className="px-4 py-2 bg-green-600 text-white rounded">
-          Demander Retrait
+        <button
+          onClick={handleWithdraw}
+          className="px-4 py-2 bg-green-600 text-white rounded"
+        >
+          Demander un retrait
         </button>
       </div>
 
-      <table className="w-full border shadow bg-white">
-        <thead className="bg-gray-100">
-          <tr>
-            <th>ID</th>
-            <th>Montant</th>
-            <th>Statut</th>
-            <th>Date</th>
-          </tr>
-        </thead>
-        <tbody>
-          {withdrawals.map(w => (
-            <tr key={w.id} className="border-t">
-              <td className="p-2">{w.id}</td>
-              <td className="p-2">{w.amount} CFA</td>
-              <td className="p-2">{w.status}</td>
-              <td className="p-2">{new Date(w.created_at).toLocaleString()}</td>
-            </tr>
-          ))}
-        </tbody>
-      </table>
+      <h2 className="text-xl mb-2">📜 Historique</h2>
+      <ul>
+        {withdrawals.map(w => (
+          <li key={w.id} className="border p-2 mb-2 rounded">
+            {w.amount} CFA – {w.status}
+          </li>
+        ))}
+      </ul>
     </div>
   );
 }
 
-export default SellerWithdrawals;
+export default Withdrawals;
