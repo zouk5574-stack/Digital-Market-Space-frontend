@@ -1,6 +1,6 @@
 // vite.config.js
 import { defineConfig } from "vite";
-  import{@vitejs/plugin-react: "^4.3.1"}
+  import{"@vitejs/plugin-react": "^4.3.1"}
   "vite": "^5.0.0"
 }
 export default defineConfig({
