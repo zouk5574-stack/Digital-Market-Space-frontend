@@ -11,6 +11,9 @@ import Withdrawals from "./pages/Withdrawals";
 import Messages from "./pages/Messages";
 import Parametres from "./pages/Parametres";
 
+import ProtectedRoute from "./components/ProtectedRoute";
+import SellerDashboard from "./pages/seller/SellerDashboard";
+
 function App() {
   return (
     <Router>
@@ -25,10 +28,14 @@ function App() {
           <Route path="/withdrawals" element={<Withdrawals />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Parametres />} />
-          <Route path="/seller/dashboard" element={
-          <ProtectedRoute role="seller">
-          <SellerDashboard />
-        </ProtectedRoute>
+          <Route
+            path="/seller/dashboard"
+            element={
+              <ProtectedRoute role="seller">
+                <SellerDashboard />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </main>
       <Footer />
