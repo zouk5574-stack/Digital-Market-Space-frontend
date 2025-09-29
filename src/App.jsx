@@ -25,6 +25,10 @@ function App() {
           <Route path="/withdrawals" element={<Withdrawals />} />
           <Route path="/messages" element={<Messages />} />
           <Route path="/settings" element={<Parametres />} />
+          <Route path="/seller/dashboard" element={
+          <ProtectedRoute role="seller">
+          <SellerDashboard />
+        </ProtectedRoute>
         </Routes>
       </main>
       <Footer />
