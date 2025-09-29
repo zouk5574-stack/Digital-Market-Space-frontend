@@ -1,5 +1,5 @@
 {
-  "name": "digital-market-space-frontend",
+  "name": "digital-market-space-frontend ":
   "version": "1.0.0",
   "private": true,
   "type": "module",
@@ -25,4 +25,4 @@
   "engines": {
     "node": ">=18"
   }
-}
+},
