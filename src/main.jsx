@@ -27,12 +27,15 @@ import BuyerOrders from "./pages/buyer/Orders";
 
 import ProtectedRoute from "./components/ui/ProtectedRoute";
 import { AuthProvider } from "./utils/useAuth";
+import { ToastContainer } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <AuthProvider>
         <Toaster position="top-right" />
+        <ToastContainer position="top-right" autoClose={3000} />
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
