@@ -27,15 +27,13 @@ import BuyerOrders from "./pages/buyer/Orders";
 
 import ProtectedRoute from "./components/ui/ProtectedRoute";
 import { AuthProvider } from "./utils/useAuth";
-import { ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
 
 function AppRoutes() {
   return (
     <BrowserRouter>
       <AuthProvider>
-        <Toaster position="top-right" />
-        <ToastContainer position="top-right" autoClose={3000} />
+        {/* ✅ Garder seulement react-hot-toast */}
+        <Toaster position="top-right" reverseOrder={false} />
         <Routes>
           <Route element={<Layout />}>
             <Route index element={<Home />} />
@@ -65,7 +63,6 @@ function AppRoutes() {
               <Route index element={<ProtectedRoute roles={['buyer']}><BuyerDashboard/></ProtectedRoute>} />
               <Route path="orders" element={<ProtectedRoute roles={['buyer']}><BuyerOrders/></ProtectedRoute>} />
             </Route>
-
           </Route>
 
           {/* fallback */}
